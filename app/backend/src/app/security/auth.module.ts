@@ -14,17 +14,13 @@ import { LocalStrategy } from './strategy/local.strategy';
     PassportModule,
     PrismaModule,
     UserModule,
-    JwtModule.registerAsync({
-      useFactory: async () => {
-        return {
-          secret: process.env.AUTH_SECRET,
-          signOptions: { expiresIn: '86400s' },
-        };
-      },
+    JwtModule.register({
+      secret: process.env.AUTH_SECRET,
+      signOptions: { expiresIn: '1d' },
     }),
   ],
   controllers: [AuthController],
   providers: [LocalStrategy, JwtStrategy, AuthService],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
