@@ -4,14 +4,50 @@ generator client {
 
 datasource db {
     provider = "postgresql"
-    url      = env("DATABASE_URL_OPERATION")
+    url      = env("DATABASE_URL")
 }
 
-generator erd {
-    provider = "prisma-erd-generator"
-    output   = "../docs/erd/ERD.svg"
+model gntClient {
+    id          String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+    fullName    String
+    email       String      @unique
+    phone       String
+    birthDate   DateTime
+    address     gntAddress?
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    canceledAt  DateTime?
+    createdById String?     @db.Uuid
+    modifyById  String?     @db.Uuid
+    createdBy   gntUser?    @relation("CreatedBy", fields: [createdById], references: [id])
+    modifiedBy  gntUser?    @relation("ModifiedBy", fields: [modifyById], references: [id])
 }
 
-model Logs {
-    id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+model gntAddress {
+    id       String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+    street   String
+    number   String
+    city     String
+    state    String
+    zipCode  String
+    client   gntClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+    clientId String    @unique @db.Uuid
+}
+
+model gntUser {
+    id              String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+    name            String
+    email           String      @unique
+    password        String
+    role            UserRole    @default(USER)
+    createdAt       DateTime    @default(now())
+    updatedAt       DateTime    @updatedAt
+    canceledAt      DateTime?
+    createdClients  gntClient[] @relation("CreatedBy")
+    modifiedClients gntClient[] @relation("ModifiedBy")
+}
+
+enum UserRole {
+    ADMIN
+    USER
 }

@@ -7,7 +7,7 @@ import {
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit {
+export class GntPrismaService extends PrismaClient implements OnModuleInit {
   async onModuleInit(): Promise<any> {
     logger.log(`Connecting to the database...`);
     await this.$connect().then(() => {
@@ -22,4 +22,4 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   }
 }
 
-const logger = new Logger('📚 ' + PrismaService.name);
+const logger = new Logger('📚 ' + GntPrismaService.name);

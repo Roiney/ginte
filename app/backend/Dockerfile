@@ -31,8 +31,8 @@ ENV PORT=3000 \
     PG_HOST_STORE=db \  
     PG_USER_STORE=postgres \
     PG_PASSWORD_STORE=postgres \
-    PG_DATABASE_STORE=genti \
-    PG_PORT_STORE=5432 \  
+    PG_DATABASE_STORE=ginte\
+    PG_PORT_STORE=5434 \  
     DATABASE_URL=postgresql://postgres:postgres@db:5432/pier-Cloud 
 
 # Exponha a porta usada pela aplicação
