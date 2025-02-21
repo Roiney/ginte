@@ -1,0 +1,9 @@
+# compiled output
+/dist
+.npmrc
+coverage
+.czrc
+pgdata_gateway
+pgdata_store
+/pgdata_gateway
+/pgdata_store

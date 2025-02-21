@@ -1,0 +1,17 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL_OPERATION")
+}
+
+generator erd {
+    provider = "prisma-erd-generator"
+    output   = "../docs/erd/ERD.svg"
+}
+
+model Logs {
+    id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+}
