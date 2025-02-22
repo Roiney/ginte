@@ -1,15 +1,24 @@
 import {
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { gntUser } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { IsPublic } from './decorator/is-public.decorator';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { AuthRequestJwt } from './interface/authRequestJWTStrategy.interface';
 import { AuthRequest } from './interface/authRequestLocalStrategy.interface';
 import { LoginResponse } from './interface/loginSucess.interface';
 
@@ -62,5 +71,15 @@ export class AuthController {
   @Post('login')
   async signInPass(@Req() request: AuthRequest): Promise<LoginResponse> {
     return await this.authService.login(request.user);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get('validation')
+  async validation(@Req() request: AuthRequestJwt): Promise<gntUser> {
+    const authenticatedUser = request.user;
+
+    return await this.authService.validateUser(authenticatedUser.email);
   }
 }
