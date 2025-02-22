@@ -1,15 +1,7 @@
 import { useState } from "react";
-import { FaSearch, FaTrash } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import styled from "styled-components";
-
-interface Client {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  birthdate: string;
-  address: string;
-}
+import { Client } from "../reducer";
 
 interface ClientsTableProps {
   clients: Client[];
@@ -111,32 +103,20 @@ const PaginationButton = styled.button`
   }
 `;
 
-const ClientsTable = ({ clients }: ClientsTableProps) => {
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<number[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
+interface ClientsTableProps {
+  clients: Client[];
+  search: string;
+  setSearch: (value: string) => void;
+  page: number;
+  setPage: (value: number) => void;
+}
 
-  const handleSelect = (id: number) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  };
+const ClientsTable = ({ clients, search, setSearch, page, setPage }: ClientsTableProps) => {
+  const [selected, setSelected] = useState<string[]>([]);
 
-  const filteredClients = clients.filter(
-    (client) =>
-      client.name.toLowerCase().includes(search.toLowerCase()) ||
-      client.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const safeClients = Array.isArray(clients) ? clients : [];
 
-  const totalPages = Math.ceil(filteredClients.length / rowsPerPage);
-  const displayedClients = filteredClients.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
-
-
-return (
+  return (
     <TableContainer>
       {/* Barra de Pesquisa */}
       <SearchBar>
@@ -149,14 +129,6 @@ return (
         />
       </SearchBar>
 
-      {/* Botão de Excluir */}
-      {selected.length > 0 && (
-        <DeleteButton>
-          {FaTrash as unknown as JSX.Element}
-          Excluir Selecionados
-        </DeleteButton>
-      )}
-
       {/* Tabela */}
       <Table>
         <thead>
@@ -164,9 +136,13 @@ return (
             <TableHeader>
               <Checkbox
                 type="checkbox"
-                checked={selected.length === clients.length}
+                checked={selected.length === safeClients.length}
                 onChange={() =>
-                  setSelected(selected.length === clients.length ? [] : clients.map((c) => c.id))
+                  setSelected(
+                    selected.length === safeClients.length
+                      ? []
+                      : safeClients.map((c) => String(c.id))
+                  )
                 }
               />
             </TableHeader>
@@ -178,45 +154,48 @@ return (
           </tr>
         </thead>
         <tbody>
-          {displayedClients.map((client) => (
-            <TableRow key={client.id}>
-              <TableData>
-                <Checkbox
-                  type="checkbox"
-                  checked={selected.includes(client.id)}
-                  onChange={() => handleSelect(client.id)}
-                />
-              </TableData>
-              <TableData>{client.name}</TableData>
-              <TableData>{client.email}</TableData>
-              <TableData>{client.phone}</TableData>
-              <TableData>{client.birthdate}</TableData>
-              <TableData>{client.address}</TableData>
-            </TableRow>
-          ))}
+          {safeClients.map((client) => {
+            const clientId = String(client.id);
+
+            return (
+              <TableRow key={clientId}>
+                <TableData>
+                  <Checkbox
+                    type="checkbox"
+                    checked={selected.includes(clientId)}
+                    onChange={() => setSelected((prev) =>
+                      prev.includes(clientId)
+                        ? prev.filter((i) => i !== clientId)
+                        : [...prev, clientId]
+                    )}
+                  />
+                </TableData>
+                <TableData>{client.fullName}</TableData>
+                <TableData>{client.email}</TableData>
+                <TableData>{client.phone}</TableData>
+                <TableData>{client.birthDate}</TableData>
+                <TableData>{client.address}</TableData>
+              </TableRow>
+            );
+          })}
         </tbody>
       </Table>
 
-      {/* Paginação */}
+      {/* Paginação baseada na API */}
       <Pagination>
-        <span>{selected.length} de {filteredClients.length} linhas selecionadas</span>
+        <span>Página {page}</span>
         <div>
-          <PaginationButton
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(currentPage - 1)}
-          >
+          <PaginationButton disabled={page === 1} onClick={() => setPage(page - 1)}>
             Anterior
           </PaginationButton>
-          <PaginationButton
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(currentPage + 1)}
-          >
+          <PaginationButton onClick={() => setPage(page + 1)}>
             Próxima
           </PaginationButton>
         </div>
       </Pagination>
     </TableContainer>
-);
+  );
 };
 
 export default ClientsTable;
+

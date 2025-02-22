@@ -113,10 +113,10 @@ const ClientForm = () => {
   const { loading, error }: ClientState = useAppSelector((state) => state.client);
 
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
     phone: "",
-    birthdate: "",
+    birthDate: "",
     address: "",
   });
 
@@ -125,7 +125,7 @@ const ClientForm = () => {
   };
 
   const handleCancel = () => {
-    setFormData({ name: "", email: "", phone: "", birthdate: "", address: "" });
+    setFormData({ fullName: "", email: "", phone: "", birthDate: "", address: "" });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -157,7 +157,7 @@ const ClientForm = () => {
         {/* Nome e E-mail */}
         <FormRow>
           <InputContainer>
-            <Input type="text" name="name" placeholder="Nome *" value={formData.name} onChange={handleChange} />
+            <Input type="text" name="fullName" placeholder="Nome *" value={formData.fullName} onChange={handleChange} />
             <Icon>{FaUser as unknown as JSX.Element}</Icon>
           </InputContainer>
           <InputContainer>
@@ -173,7 +173,7 @@ const ClientForm = () => {
             <Icon>{FaPhone as unknown as JSX.Element}</Icon>
           </InputContainer>
           <InputContainer>
-            <Input type="date" name="birthdate" value={formData.birthdate} onChange={handleChange} />
+            <Input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} />
             <Icon>{FaCalendar as unknown as JSX.Element}</Icon>
           </InputContainer>
         </FormRow>

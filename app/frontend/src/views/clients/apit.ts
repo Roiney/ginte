@@ -1,28 +1,29 @@
 import axios from "axios";
 import { getAuthToken } from "../../utils/getAuthToken";
+import { Client } from "./reducer";
 import API_CLIENT_URL from "./url";
 
 export const createClientRequest = async ({
-  name,
+  fullName,
   email,
   phone,
-  birthdate,
+  birthDate,
   address,
 }: {
-  name: string;
+  fullName: string;
   email: string;
   phone: string;
-  birthdate: string;
+  birthDate: string;
   address: string;
 }): Promise<any> => {
   const token = getAuthToken();
   const response = await axios.post(
     `${API_CLIENT_URL}`,
     {
-      fullName: name,
+      fullName,
       email,
       phone,
-      birthDate: birthdate,
+      birthDate,
       address,
     },
     {
@@ -34,4 +35,47 @@ export const createClientRequest = async ({
   );
   console.log(response.data);
   return response.data;
+};
+
+export const fetchClientsRequest = async ({
+  page,
+  limit,
+  search,
+  order = "asc",
+}: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  order?: "asc" | "desc";
+}): Promise<{
+  clients: Client[];
+  total: number;
+  limit: number;
+  page: number;
+}> => {
+  try {
+    const token = getAuthToken();
+
+    // Construção dinâmica da URL com os filtros
+    const params = new URLSearchParams();
+    if (page) params.append("page", String(page));
+    if (limit) params.append("limit", String(limit));
+    if (search) params.append("name", search);
+    params.append("order", order); // Padrão "asc"
+
+    const url = `${API_CLIENT_URL}?${params.toString()}`;
+    console.log("🔎 URL da requisição:", url);
+
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("📌 Clientes carregados:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("❌ Erro na requisição:", error);
+    throw new Error(error.response?.data?.message || "Erro ao buscar clientes");
+  }
 };

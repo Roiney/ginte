@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
+import { useAppDispatch, useAppSelector } from "../../../hooks";
 import ClientsTable from "../components/ClientsTable";
 import Sidebar from "../components/sidebar";
+import { ClientState, fetchClients } from "../reducer";
 
 const PageContainer = styled.div`
   display: flex;
@@ -22,24 +24,38 @@ const Title = styled.h1`
 `;
 
 const ClientsPage = () => {
+  const dispatch = useAppDispatch();
+  const { clients, loading, error }: ClientState = useAppSelector((state) => state.client);
 
-     const [clients] = useState([
-    { id: 1, name: "Latoya Bartlett", email: "Alison48@hotmail.com", phone: "489-742-5107", birthdate: "20/06/2000", address: "Rua XYZ" },
-    { id: 2, name: "Jack McClure", email: "Maddison28@gmail.com", phone: "204-209-6485", birthdate: "20/06/2000", address: "Rua XYZ" },
-    { id: 3, name: "Ana Kreiger", email: "Pfeffer@hotmail.com", phone: "637-820-7704", birthdate: "20/06/2000", address: "Rua XYZ" },
-    { id: 4, name: "Edith Feil", email: "Ethelyn60@hotmail.com", phone: "855-494-0199", birthdate: "20/06/2000", address: "Rua XYZ" },
-    { id: 5, name: "Andy Shields", email: "schmitt@yahoo.com", phone: "802-453-2916", birthdate: "20/06/2000", address: "Rua XYZ" },
-  ]);
+  // 🔥 Estado para filtros
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10); // Mantemos um valor fixo para `limit`
+
+  // 🚀 Dispara a API sempre que `search` ou `page` mudarem
+  useEffect(() => {
+    dispatch(fetchClients({ search, page, limit }));
+  }, [dispatch, search, page, limit]);
 
   return (
     <PageContainer>
-      {/* Sidebar Fixo */}
       <Sidebar />
-
-      {/* Conteúdo da Página */}
       <Content>
         <Title>Clientes</Title>
-        <ClientsTable clients={clients} />
+
+        {loading && <p>Carregando clientes...</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+        {/* Passamos os filtros para a tabela */}
+        {!loading && !error && (
+          <ClientsTable
+            clients={clients}
+            search={search}
+            setSearch={setSearch}
+            page={page}
+            setPage={setPage}
+          />
+        )}
       </Content>
     </PageContainer>
   );
