@@ -1,55 +1,83 @@
 import { useState } from "react";
 import { FaCalendar, FaEnvelope, FaMapMarkerAlt, FaPhone, FaPlus, FaUser } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { useAppDispatch, useAppSelector } from "../../../hooks";
+import { ClientState, createClient } from "../reducer";
+
+const PageContainer = styled.div`
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 50px;
+  background: #f8f8f8;
+`;
 
 const FormContainer = styled.div`
   background: #181818;
-  padding: 20px;
+  padding: 30px;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
   color: white;
-  max-width: 700px;
-  margin: auto;
+  width: 100%;
+  max-width: 950px;  /* Ajustado para maior largura */
+  min-height: 250px;
+  margin-top: 20px;
 `;
 
 const FormRow = styled.div`
   display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 20px; /* Aumentei o espaçamento horizontal entre os inputs */
+  flex-wrap: wrap; /* Inputs irão para a linha de baixo se necessário */
+  width: 100%;
 `;
 
 const InputContainer = styled.div`
   flex: 1;
   position: relative;
+  min-width: 250px; /* Evita que os inputs fiquem esmagados */
+  margin-bottom: 15px; /* Espaçamento vertical entre as linhas */
 `;
+
 
 const Input = styled.input`
   width: 100%;
-  padding: 12px 40px 12px 12px;
-  border: none;
+  padding: 10px 40px 10px 12px;
+  border: 1px solid #444;
   border-radius: 5px;
   background: #222;
   color: white;
-  font-size: 14px;
+  font-size: 15px;
   outline: none;
+  box-sizing: border-box; /* Evita que padding aumente o tamanho do input */
+
+  &:focus {
+    border-color: #66bb6a;
+  }
 
   &::placeholder {
     color: #aaa;
   }
 `;
 
+
+
 const Icon = styled.div`
   position: absolute;
   top: 50%;
-  right: 12px;
+  right: 14px;
   transform: translateY(-50%);
   color: #aaa;
+  font-size: 18px;
 `;
 
 const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
+  margin-top: 15px;
   gap: 10px;
 `;
 
@@ -60,14 +88,15 @@ interface ButtonProps {
 }
 
 const Button = styled.button<ButtonProps>`
-  padding: 10px 15px;
+  padding: 12px 18px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  font-size: 14px;
   background: ${({ primary }) => (primary ? "green" : "#444")};
   color: ${({ primary }) => (primary ? "white" : "#ddd")};
 
@@ -76,7 +105,13 @@ const Button = styled.button<ButtonProps>`
   }
 `;
 
+
+
 const ClientForm = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { loading, error }: ClientState = useAppSelector((state) => state.client);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -93,9 +128,27 @@ const ClientForm = () => {
     setFormData({ name: "", email: "", phone: "", birthdate: "", address: "" });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Cadastro enviado:", formData);
+
+  try {
+  const response = await dispatch(createClient(formData));
+
+  if (response.meta.requestStatus === "fulfilled") {
+    alert("Usuário cadastrado com sucesso!");
+    handleCancel();
+    navigate(`/clients`);
+  } else {
+    // Captura a mensagem de erro retornada pelo Redux Thunk
+    const errorMessage = response.payload || "Erro ao cadastrar usuário!";
+    alert(`Erro: ${errorMessage}`);
+  }
+} catch (error: any) {
+  // Captura erros inesperados (ex: falha na conexão)
+  console.error("Erro inesperado:", error);
+  alert("Erro inesperado ao cadastrar usuário. Tente novamente.");
+}
+
   };
 
   return (
@@ -136,13 +189,16 @@ const ClientForm = () => {
         {/* Botões */}
         <ButtonContainer>
           <Button type="button" onClick={handleCancel}>Cancelar</Button>
-          <Button type="submit" primary>
-            Cadastrar {FaPlus as unknown as JSX.Element}
+          <Button type="submit" primary disabled={loading}>
+            {loading ? "Cadastrando..." : "Cadastrar"} {FaPlus as unknown as JSX.Element}
           </Button>
         </ButtonContainer>
+
       </form>
     </FormContainer>
   );
 };
 
 export default ClientForm;
+
+

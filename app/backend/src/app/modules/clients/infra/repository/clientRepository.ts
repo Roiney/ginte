@@ -17,6 +17,7 @@ export class ClientRepository {
       clientCreate.email,
       clientCreate.phone,
       clientCreate.birthDate,
+      clientCreate.address,
       clientCreate.createdAt,
       clientCreate.updatedAt,
       clientCreate.createdById,

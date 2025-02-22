@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import ClientForm from "./components/ClientForm";
-import Sidebar from "./components/sidebar";
+import ClientForm from "../components/ClientForm";
+import Sidebar from "../components/sidebar";
 
 const PageContainer = styled.div`
   display: flex;

@@ -1,6 +1,7 @@
 import { FaPlus, FaSignOutAlt, FaUsers } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+
 const SidebarContainer = styled.div`
   width: 260px;
   height: 853px;
@@ -28,6 +29,7 @@ const MenuItem = styled.div<{ active?: boolean }>`
   cursor: pointer;
   border-radius: 8px;
   background: ${({ active }) => (active ? "#E0ECD4" : "transparent")};
+  font-weight: ${({ active }) => (active ? "bold" : "normal")};
 
   &:hover {
     background: #e0ecd4;
@@ -50,14 +52,22 @@ const LogoutButton = styled.div`
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // Obtém a rota atual
+
   return (
     <SidebarContainer>
       {/* Menu */}
       <Menu>
-        <MenuItem onClick={() => navigate("/clients")}>
+        <MenuItem
+          active={location.pathname === "/clients"}
+          onClick={() => navigate("/clients")}
+        >
           {FaUsers as unknown as JSX.Element} Clientes
         </MenuItem>
-        <MenuItem onClick={() => navigate("/new-client")}>
+        <MenuItem
+          active={location.pathname === "/new-client"}
+          onClick={() => navigate("/new-client")}
+        >
           {FaPlus as unknown as JSX.Element} Cadastrar Cliente
         </MenuItem>
       </Menu>

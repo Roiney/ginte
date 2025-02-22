@@ -1,68 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 import {
   IsDateString,
   IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,
-  Length,
   Matches,
-  ValidateNested,
 } from 'class-validator';
-
-export class CreateGntAddressDto {
-  @IsString({ message: 'O campo street deve ser uma string' })
-  @IsNotEmpty({ message: 'O campo street não pode estar vazio' })
-  @ApiProperty({
-    example: 'Av. Paulista',
-    required: true,
-    description: 'Rua do endereço',
-    format: 'string',
-  })
-  street!: string;
-
-  @IsString({ message: 'O campo number deve ser uma string' })
-  @IsNotEmpty({ message: 'O campo number não pode estar vazio' })
-  @ApiProperty({
-    example: '1234',
-    required: true,
-    description: 'Número do endereço',
-    format: 'string',
-  })
-  number!: string;
-
-  @IsString({ message: 'O campo city deve ser uma string' })
-  @IsNotEmpty({ message: 'O campo city não pode estar vazio' })
-  @ApiProperty({
-    example: 'São Paulo',
-    required: true,
-    description: 'Cidade do endereço',
-    format: 'string',
-  })
-  city!: string;
-
-  @IsString({ message: 'O campo state deve ser uma string' })
-  @IsNotEmpty({ message: 'O campo state não pode estar vazio' })
-  @ApiProperty({
-    example: 'SP',
-    required: true,
-    description: 'Estado do endereço',
-    format: 'string',
-  })
-  state!: string;
-
-  @IsString({ message: 'O campo zipCode deve ser uma string' })
-  @Length(8, 8, { message: 'O campo zipCode deve ter exatamente 8 caracteres' })
-  @IsNotEmpty({ message: 'O campo zipCode não pode estar vazio' })
-  @ApiProperty({
-    example: '01311300',
-    required: true,
-    description: 'Código postal (CEP) do endereço',
-    format: 'string',
-  })
-  zipCode!: string;
-}
 
 export class CreateGntClientDto {
   @IsString({ message: 'O campo fullName deve ser uma string' })
@@ -110,13 +54,14 @@ export class CreateGntClientDto {
   })
   birthDate!: string;
 
-  @ValidateNested()
+  @IsString({ message: 'O campo address deve ser uma string' })
   @IsOptional()
-  @Type(() => CreateGntAddressDto)
+  @IsNotEmpty({ message: 'O campo address não pode estar vazio se fornecido' })
   @ApiProperty({
-    type: CreateGntAddressDto,
-    description: 'Endereço do cliente (opcional)',
+    example: 'Rua das Palmeiras, 123 - São Paulo, SP',
     required: false,
+    description: 'Endereço do cliente',
+    format: 'string',
   })
-  address?: CreateGntAddressDto;
+  address?: string;
 }

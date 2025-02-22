@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styled from "styled-components";
-import ClientsTable from "./components/ClientsTable";
-import Sidebar from "./components/sidebar";
+import ClientsTable from "../components/ClientsTable";
+import Sidebar from "../components/sidebar";
 
 const PageContainer = styled.div`
   display: flex;

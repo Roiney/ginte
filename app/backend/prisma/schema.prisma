@@ -8,30 +8,19 @@ datasource db {
 }
 
 model gntClient {
-    id          String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+    id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
     fullName    String
-    email       String      @unique
+    email       String    @unique
     phone       String
     birthDate   String
-    address     gntAddress?
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
+    address     String
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
     canceledAt  DateTime?
-    createdById String?     @db.Uuid
-    modifyById  String?     @db.Uuid
-    createdBy   gntUser?    @relation("CreatedBy", fields: [createdById], references: [id])
-    modifiedBy  gntUser?    @relation("ModifiedBy", fields: [modifyById], references: [id])
-}
-
-model gntAddress {
-    id       String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-    street   String
-    number   String
-    city     String
-    state    String
-    zipCode  String
-    client   gntClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
-    clientId String    @unique @db.Uuid
+    createdById String?   @db.Uuid
+    modifyById  String?   @db.Uuid
+    createdBy   gntUser?  @relation("CreatedBy", fields: [createdById], references: [id])
+    modifiedBy  gntUser?  @relation("ModifiedBy", fields: [modifyById], references: [id])
 }
 
 model gntUser {

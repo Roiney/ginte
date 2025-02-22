@@ -9,6 +9,7 @@ export default class ClientObject {
     readonly email: string,
     readonly phone: string,
     readonly birthDate: string,
+    readonly address: string,
     readonly createdAt: Date = new Date(),
     readonly updatedAt: Date = new Date(),
     readonly createdById?: string | null,
@@ -21,7 +22,8 @@ export default class ClientObject {
       !options.fullName ||
       !options.email ||
       !options.phone ||
-      !options.birthDate
+      !options.birthDate ||
+      !options.address
     ) {
       throw new Error(
         'Os campos fullName, email, phone e birthDate são obrigatórios.',
@@ -34,6 +36,7 @@ export default class ClientObject {
       options.email,
       options.phone,
       options.birthDate,
+      options.address,
       options.createdAt ?? new Date(),
       options.updatedAt ?? new Date(),
       options.createdById,
