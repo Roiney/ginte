@@ -26,6 +26,26 @@ export class ClientRepository {
     );
   }
 
+  async update(id: string, data: ClientObject): Promise<ClientObject> {
+    const udpateCreate = await this.prismaService.gntClient.update({
+      where: { id },
+      data,
+    });
+    return new ClientObject(
+      udpateCreate.id,
+      udpateCreate.fullName,
+      udpateCreate.email,
+      udpateCreate.phone,
+      udpateCreate.birthDate,
+      udpateCreate.address,
+      udpateCreate.createdAt,
+      udpateCreate.updatedAt,
+      udpateCreate.createdById,
+      udpateCreate.canceledAt,
+      udpateCreate.modifyById,
+    );
+  }
+
   async findOne(id: string): Promise<ClientObject> {
     const findClient = await this.prismaService.gntClient.findUnique({
       where: { id },

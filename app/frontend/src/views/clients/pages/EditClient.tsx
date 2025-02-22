@@ -2,9 +2,9 @@ import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
-import ClientForm from "../components/ClientForm";
 import Sidebar from "../components/sidebar";
 import { fetchClient } from "../reducer";
+import ClientFormUpdate from "../components/ClientFormUpdate";
 
 const PageContainer = styled.div`
   display: flex;
@@ -45,7 +45,7 @@ const ClientsEditionPage = () => {
         {loading && <p>Carregando cliente...</p>}
         {error && <p style={{ color: "red" }}>{error}</p>}
 
-        {selectedClient && <ClientForm client={selectedClient} onClose={() => navigate("/clients")} />}
+        {selectedClient && <ClientFormUpdate client={selectedClient} onClose={() => navigate("/clients")} />}
       </Content>
     </PageContainer>
   );

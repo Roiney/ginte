@@ -7,7 +7,9 @@ import {
   HttpStatus,
   Inject,
   Param,
+  ParseUUIDPipe,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -24,11 +26,13 @@ import { Roles } from 'src/app/security/decorator/roles.decorator';
 import { JwtAuthGuard } from 'src/app/security/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/app/security/guards/role-auth.guard';
 import { AuthRequestJwt } from 'src/app/security/interface/authRequestJWTStrategy.interface';
-import { CreateClient } from '../application/useCase/createClient';
-import { DeleteOneClient } from '../application/useCase/deleteOne';
-import { FindAllClients } from '../application/useCase/findAllClients';
-import { FindOneClient } from '../application/useCase/findOne';
-import { CreateGntClientDto } from '../domain/dto/createClient.dto';
+import { CreateClient } from '../../application/useCase/createClient';
+import { DeleteOneClient } from '../../application/useCase/deleteOne';
+import { FindAllClients } from '../../application/useCase/findAllClients';
+import { FindOneClient } from '../../application/useCase/findOne';
+import { UpdateClient } from '../../application/useCase/updateClient';
+import { CreateGntClientDto } from '../../domain/dto/createClient.dto';
+import { UpdateGntClientDto } from '../../domain/dto/updateClient';
 
 @ApiTags('Client')
 @Controller('client')
@@ -38,6 +42,7 @@ export class ClientController {
     @Inject(FindAllClients) private readonly findAllClients: FindAllClients,
     @Inject(FindOneClient) private readonly findOneClient: FindOneClient,
     @Inject(DeleteOneClient) private readonly deleteOneClient: DeleteOneClient,
+    @Inject(UpdateClient) private readonly updateClient: UpdateClient,
   ) {}
 
   @ApiOperation({
@@ -140,5 +145,29 @@ export class ClientController {
   @Delete(':id')
   async deleteOne(@Param('id') id: string): Promise<any> {
     return await this.deleteOneClient.execute(id);
+  }
+
+  @ApiOperation({
+    summary: 'Route to update an existing Client.',
+    description:
+      'Route used to update an existing Client using the provided ID and updated information in JSON.',
+    tags: ['Client'],
+  })
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Put(':id')
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateClientDto: UpdateGntClientDto,
+    @Req() request: AuthRequestJwt,
+  ): Promise<any> {
+    const authenticatedUser = request.user;
+    return await this.updateClient.execute(
+      id,
+      updateClientDto,
+      authenticatedUser,
+    );
   }
 }

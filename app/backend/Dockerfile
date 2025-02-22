@@ -27,13 +27,14 @@ COPY . .
 RUN pnpm run build
 
 # Definir as variáveis de ambiente
-ENV PORT=3000 \
-    PG_HOST_STORE=db \  
+ENV PORT=3035 \
+    PG_HOST_STORE=db \
     PG_USER_STORE=postgres \
     PG_PASSWORD_STORE=postgres \
-    PG_DATABASE_STORE=ginte\
-    PG_PORT_STORE=5434 \  
-    DATABASE_URL=postgresql://postgres:postgres@db:5432/pier-Cloud 
+    PG_DATABASE_STORE=ginte \
+    PG_PORT_STORE=5432 \  
+    DATABASE_URL=postgresql://postgres:postgres@db:5432/ginte
+
 
 # Exponha a porta usada pela aplicação
 EXPOSE 3000

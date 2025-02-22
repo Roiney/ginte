@@ -4,6 +4,7 @@ import {
   deleteClientRequest,
   fetchClientRequest,
   fetchClientsRequest,
+  updateClientRequest,
 } from "./apit";
 
 // Interface do cliente
@@ -40,14 +41,9 @@ export const fetchClients = createAsyncThunk<
   "clients/fetchClients",
   async ({ search = "", page = 1, limit = 10 }, { rejectWithValue }) => {
     try {
-      console.log(
-        `🔎 Buscando clientes: search="${search}", page=${page}, limit=${limit}`
-      );
-
       const response = await fetchClientsRequest({ search, page, limit });
 
       if (!Array.isArray(response.clients)) {
-        console.error("Erro: A API não retornou um array válido:", response);
         return rejectWithValue("A API retornou um formato inválido.");
       }
 
@@ -85,7 +81,6 @@ export const fetchClient = createAsyncThunk<
   { rejectValue: string }
 >("clients/fetchClient", async (id, { rejectWithValue }) => {
   try {
-    console.log(`🔍 Buscando cliente ID=${id}...`);
     const response = await fetchClientRequest(id);
     return response;
   } catch (error: any) {
@@ -93,7 +88,33 @@ export const fetchClient = createAsyncThunk<
     return rejectWithValue(error.message);
   }
 });
-// 🔥 Thunk para cadastrar um novo cliente
+
+export const updateClient = createAsyncThunk<
+  Client,
+  Client,
+  { rejectValue: string }
+>("clients/updateClient", async (clientData, { rejectWithValue }) => {
+  try {
+    if (!clientData.id) {
+      throw new Error("ID do cliente é obrigatório para atualização.");
+    }
+
+    console.log(`🔄 Atualizando cliente ID=${clientData.id}...`);
+
+    // 🔥 Converte a data para o formato correto (YYYY-MM-DD)
+    const formattedData = {
+      ...clientData,
+      birthDate: new Date(clientData.birthDate).toISOString().split("T")[0],
+    };
+
+    const response = await updateClientRequest(clientData.id, formattedData);
+    return response;
+  } catch (error: any) {
+    console.error("Erro ao atualizar cliente:", error.message);
+    return rejectWithValue(error.message);
+  }
+});
+
 export const createClient = createAsyncThunk<
   Client,
   Client,
@@ -105,8 +126,6 @@ export const createClient = createAsyncThunk<
       ...clientData,
       birthDate: new Date(clientData.birthDate).toISOString().split("T")[0],
     };
-
-    console.log("Enviando cliente:", formattedData);
 
     const response = await createClientRequest(formattedData);
     return response;
@@ -181,13 +200,31 @@ const clientSlice = createSlice({
         fetchClient.fulfilled,
         (state, action: PayloadAction<Client>) => {
           state.loading = false;
-          state.selectedClient = action.payload; // 🔥 Armazena o cliente individual
+          state.selectedClient = action.payload;
         }
       )
       .addCase(fetchClient.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
         state.selectedClient = null;
+      })
+      .addCase(updateClient.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        updateClient.fulfilled,
+        (state, action: PayloadAction<Client>) => {
+          state.loading = false;
+          state.clients = state.clients.map((client) =>
+            client.id === action.payload.id ? action.payload : client
+          );
+          state.selectedClient = action.payload; // Atualiza o cliente selecionado, se for o mesmo
+        }
+      )
+      .addCase(updateClient.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });

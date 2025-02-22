@@ -171,26 +171,27 @@ const ClientsTable = ({ clients, search, setSearch, page, setPage, onDelete }: C
             const clientId = String(client.id);
 
             return (
-              <TableRow key={clientId} onClick={() => navigate(`/edit-client/${clientId}`)}>
-                <TableData>
-                  <Checkbox
-                    type="checkbox"
-                    checked={selected.includes(clientId)}
-                    onChange={() =>
-                      setSelected((prev) =>
-                        prev.includes(clientId)
-                          ? prev.filter((i) => i !== clientId)
-                          : [...prev, clientId]
-                      )
-                    }
-                  />
-                </TableData>
-                <TableData>{client.fullName}</TableData>
-                <TableData>{client.email}</TableData>
-                <TableData>{client.phone}</TableData>
-                <TableData>{client.birthDate}</TableData>
-                <TableData>{client.address}</TableData>
-              </TableRow>
+            <TableRow key={clientId} onClick={() => navigate(`/edit-client/${clientId}`)}>
+  <TableData>
+    <Checkbox
+      type="checkbox"
+      checked={selected.includes(clientId)}
+      onClick={(e) => e.stopPropagation()} // 🔥 Impede a propagação do clique
+      onChange={() =>
+        setSelected((prev) =>
+          prev.includes(clientId)
+            ? prev.filter((i) => i !== clientId)
+            : [...prev, clientId]
+        )
+      }
+    />
+  </TableData>
+  <TableData>{client.fullName}</TableData>
+  <TableData>{client.email}</TableData>
+  <TableData>{client.phone}</TableData>
+  <TableData>{client.birthDate}</TableData>
+  <TableData>{client.address}</TableData>
+</TableRow>
             );
           })}
         </tbody>

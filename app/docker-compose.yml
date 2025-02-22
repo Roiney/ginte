@@ -8,11 +8,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=ginte
-      - PGPORT=5434
+      - PGPORT=5432
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     ports:
-      - "3031:5434"
+      - "3031:5432"
     networks:
       - postgres-network
     healthcheck:
@@ -25,7 +25,7 @@ services:
     container_name: app_backend
     build: ./backend
     ports:
-      - 3000:3000
+      - 3035:3035
     working_dir: /app-backend
     volumes:
       - ./backend/src:/app-backend/src
@@ -33,7 +33,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      - APP_PORT=3000
+      - APP_PORT=3035
       - JWT_SECRET=jwt_secret
       - DB_USER=postgres
       - DB_PASS=postgres
@@ -41,10 +41,10 @@ services:
       - DB_PORT=5432
     command: >
       sh -c "pnpm prisma migrate deploy &&
-          pnpm test -- --runInBand &&
+          pnpm prisma:seed &&
           pnpm run start"
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 3000 || exit 1"]
+      test: ["CMD-SHELL", "nc -z localhost 3035 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 15
@@ -52,6 +52,30 @@ services:
       - app-network
       - postgres-network
 
+  frontend:
+    container_name: app_frontend
+    build: ./frontend
+    ports:
+      - "3001:3000"  # Servindo o React na porta 3001
+    working_dir: /app-frontend
+    volumes:
+      - ./frontend/src:/app-frontend/src
+      - ./frontend/public:/app-frontend/public
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      - REACT_APP_API_URL=http://localhost:3035 
+    command: ["npm", "start"]
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep node || exit 1"] 
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s 
+    networks:
+      - app-network
 networks:
   app-network:
+    driver: bridge
   postgres-network:

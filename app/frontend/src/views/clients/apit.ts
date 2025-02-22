@@ -33,7 +33,7 @@ export const createClientRequest = async ({
       },
     }
   );
-  console.log(response.data);
+
   return response.data;
 };
 
@@ -64,7 +64,6 @@ export const fetchClientsRequest = async ({
     params.append("order", order); // Padrão "asc"
 
     const url = `${API_CLIENT_URL}?${params.toString()}`;
-    console.log("🔎 URL da requisição:", url);
 
     const response = await axios.get(url, {
       headers: {
@@ -96,10 +95,38 @@ export const fetchClientRequest = async (id: string): Promise<Client> => {
       },
     });
 
-    console.log("Cliente carregado:", response.data);
     return response.data;
   } catch (error: any) {
     console.error("Erro na requisição:", error);
     throw new Error(error.response?.data?.message || "Erro ao buscar cliente");
+  }
+};
+
+export const updateClientRequest = async (
+  clientId: string,
+  clientData: Partial<Client> // Permite atualização parcial
+): Promise<Client> => {
+  try {
+    const token = getAuthToken();
+    const response = await axios.put(
+      `${API_CLIENT_URL}/${clientId}`,
+      clientData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data; // Retorna o cliente atualizado
+  } catch (error: any) {
+    console.error(
+      "Erro ao atualizar cliente:",
+      error.response?.data || error.message
+    );
+    throw new Error(
+      error.response?.data?.message || "Erro ao atualizar cliente"
+    );
   }
 };
