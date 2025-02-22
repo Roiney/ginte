@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Inject,
+  Param,
   Post,
   Query,
   Req,
@@ -13,6 +15,7 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
@@ -22,7 +25,9 @@ import { JwtAuthGuard } from 'src/app/security/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/app/security/guards/role-auth.guard';
 import { AuthRequestJwt } from 'src/app/security/interface/authRequestJWTStrategy.interface';
 import { CreateClient } from '../application/useCase/createClient';
+import { DeleteOneClient } from '../application/useCase/deleteOne';
 import { FindAllClients } from '../application/useCase/findAllClients';
+import { FindOneClient } from '../application/useCase/findOne';
 import { CreateGntClientDto } from '../domain/dto/createClient.dto';
 
 @ApiTags('Client')
@@ -31,6 +36,8 @@ export class ClientController {
   constructor(
     @Inject(CreateClient) private readonly createClient: CreateClient,
     @Inject(FindAllClients) private readonly findAllClients: FindAllClients,
+    @Inject(FindOneClient) private readonly findOneClient: FindOneClient,
+    @Inject(DeleteOneClient) private readonly deleteOneClient: DeleteOneClient,
   ) {}
 
   @ApiOperation({
@@ -55,60 +62,83 @@ export class ClientController {
   @ApiOperation({
     summary: 'Get a paginated list of clients.',
     description:
-      'Retrieve a list of clients with optional filters such as name and email.',
+      'Retrieve a paginated list of clients with optional filters such as search (name or email).',
     tags: ['Client'],
   })
   @ApiQuery({
     name: 'page',
-    type: String,
+    type: Number,
     required: false,
     description: 'Page number (default: 1)',
-    example: '1',
+    example: 1,
   })
   @ApiQuery({
     name: 'limit',
-    type: String,
+    type: Number,
     required: false,
     description: 'Number of clients per page (default: 10)',
-    example: '10',
+    example: 10,
   })
   @ApiQuery({
-    name: 'order',
-    enum: ['asc', 'desc'],
-    required: false,
-    description: 'Sort order (asc | desc)',
-    example: 'asc',
-  })
-  @ApiQuery({
-    name: 'name',
+    name: 'search',
     type: String,
     required: false,
-    description: 'Filter by client name',
+    description: 'Search clients by name or email',
     example: 'John Doe',
-  })
-  @ApiQuery({
-    name: 'email',
-    type: String,
-    required: false,
-    description: 'Filter by client email',
-    example: 'johndoe@example.com',
   })
   @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
-    @Query('name') name?: string,
-    @Query('email') email?: string,
+    @Query('search') search?: string,
   ): Promise<any> {
-    const pageValue = Number(page) || 1; // Garantir que `page` é um número válido
-    const limitValue = Number(limit) || 10; // Garantir que `limit` é um número válido
+    const pageValue = Number(page) > 0 ? Number(page) : 1;
+    const limitValue = Number(limit) > 0 ? Number(limit) : 10;
 
-    return await this.findAllClients.execute(
-      limitValue,
-      pageValue,
-      name,
-      email,
-    );
+    return await this.findAllClients.execute(limitValue, pageValue, search);
+  }
+
+  @ApiOperation({
+    summary: 'Route to retrieve a Payment by ID.',
+    description:
+      'This route retrieves a Payment record from the database based on the provided ID. The request requires authentication via a Bearer token.',
+    tags: ['Payment'],
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    required: true,
+    description:
+      'ID registered in the database referring to the Payment (e.g., 1dfc9242-746b-40b7-8bd8-3342d0972aa1)',
+    example: '1dfc9242-746b-40b7-8bd8-3342d0972aa1',
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<any> {
+    // Verifique se o usuário possui a role adequada ou se está acessando as próprias informações
+    return await this.findOneClient.execute(id);
+  }
+
+  @ApiOperation({
+    summary: 'Route to delete a Payment by ID.',
+    description:
+      'This route deletes a Payment record from the database based on the provided ID. The request requires authentication via a Bearer token.',
+    tags: ['Payment'],
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    required: true,
+    description:
+      'ID registered in the database referring to the Payment (e.g., 1dfc9242-746b-40b7-8bd8-3342d0972aa1)',
+    example: '1dfc9242-746b-40b7-8bd8-3342d0972aa1',
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async deleteOne(@Param('id') id: string): Promise<any> {
+    return await this.deleteOneClient.execute(id);
   }
 }

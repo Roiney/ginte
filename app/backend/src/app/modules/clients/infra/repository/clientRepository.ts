@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, NotFoundException } from '@nestjs/common';
 import { GntPrismaService } from 'src/app/db/prisma/prismaService.service';
 import ClientObject from '../../domain/client';
 
@@ -23,6 +23,84 @@ export class ClientRepository {
       clientCreate.createdById,
       clientCreate.canceledAt,
       clientCreate.modifyById,
+    );
+  }
+
+  async findOne(id: string): Promise<ClientObject> {
+    const findClient = await this.prismaService.gntClient.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        phone: true,
+        birthDate: true,
+        address: true,
+        createdAt: true,
+        updatedAt: true,
+        createdById: true,
+        canceledAt: true,
+        modifyById: true,
+      }, // Opcional para otimizar a consulta
+    });
+
+    // 🚨 Se não encontrar, lança erro
+    if (!findClient) {
+      throw new NotFoundException(`Cliente com ID ${id} não encontrado.`);
+    }
+
+    // 🔄 Retorna o cliente encapsulado no DTO
+    return new ClientObject(
+      findClient.id,
+      findClient.fullName,
+      findClient.email,
+      findClient.phone,
+      findClient.birthDate,
+      findClient.address,
+      findClient.createdAt,
+      findClient.updatedAt,
+      findClient.createdById,
+      findClient.canceledAt,
+      findClient.modifyById,
+    );
+  }
+
+  async deleteOne(id: string): Promise<ClientObject> {
+    const deleteClient = await this.prismaService.gntClient.delete({
+      where: { id },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        phone: true,
+        birthDate: true,
+        address: true,
+        createdAt: true,
+        updatedAt: true,
+        createdById: true,
+        canceledAt: true,
+        modifyById: true,
+      }, // Opcional para otimizar a consulta
+    });
+
+    // 🚨 Se não encontrar, lança erro
+    if (!deleteClient) {
+      throw new NotFoundException(`Cliente com ID ${id} não encontrado.`);
+    }
+
+    // 🔄 Retorna o cliente encapsulado no DTO
+    return new ClientObject(
+      deleteClient.id,
+      deleteClient.fullName,
+      deleteClient.email,
+      deleteClient.phone,
+      deleteClient.birthDate,
+      deleteClient.address,
+      deleteClient.createdAt,
+      deleteClient.updatedAt,
+      deleteClient.createdById,
+      deleteClient.canceledAt,
+      deleteClient.modifyById,
     );
   }
 }

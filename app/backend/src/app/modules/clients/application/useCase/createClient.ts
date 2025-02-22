@@ -49,7 +49,7 @@ export class CreateClient {
         updatedAt: new Date(),
         createdById: createUser.id,
       });
-      console.log(newClient);
+
       return await this.clientRepository.create(newClient);
     } catch (error: any) {
       if (error instanceof NotFoundException) {

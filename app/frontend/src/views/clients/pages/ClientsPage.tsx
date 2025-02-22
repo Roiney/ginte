@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import ClientsTable from "../components/ClientsTable";
 import Sidebar from "../components/sidebar";
-import { ClientState, fetchClients } from "../reducer";
+import { ClientState, deleteClients, fetchClients } from "../reducer";
 
 const PageContainer = styled.div`
   display: flex;
@@ -27,15 +27,40 @@ const ClientsPage = () => {
   const dispatch = useAppDispatch();
   const { clients, loading, error }: ClientState = useAppSelector((state) => state.client);
 
-  // 🔥 Estado para filtros
+  // 🔥 Estados para os filtros
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(""); // Estado para debounce
   const [page, setPage] = useState(1);
-  const [limit] = useState(10); // Mantemos um valor fixo para `limit`
+  const [limit] = useState(10);
 
-  // 🚀 Dispara a API sempre que `search` ou `page` mudarem
-  useEffect(() => {
+  const fetchClientsHandler = () => {
     dispatch(fetchClients({ search, page, limit }));
-  }, [dispatch, search, page, limit]);
+  };
+
+  // 🚀 UseEffect para debounce da pesquisa
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500); // Aguarda 500ms antes de disparar a API
+
+    return () => {
+      clearTimeout(handler); // Se o usuário continuar digitando, reinicia o temporizador
+    };
+  }, [search]);
+
+    const handleDeleteClients = async (ids: string[]) => {
+    try {
+      await dispatch(deleteClients(ids)); // Chama a API de exclusão
+      fetchClientsHandler(); // Atualiza a lista após deletar
+    } catch (error) {
+      console.error("Erro ao excluir clientes:", error);
+    }
+  };
+
+  // 🚀 Dispara a API somente quando `debouncedSearch` mudar
+  useEffect(() => {
+    dispatch(fetchClients({ search: debouncedSearch, page, limit }));
+  }, [dispatch, debouncedSearch, page, limit]);
 
   return (
     <PageContainer>
@@ -54,6 +79,7 @@ const ClientsPage = () => {
             setSearch={setSearch}
             page={page}
             setPage={setPage}
+             onDelete={handleDeleteClients} 
           />
         )}
       </Content>

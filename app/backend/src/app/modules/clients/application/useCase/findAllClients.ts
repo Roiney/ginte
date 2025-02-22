@@ -16,8 +16,7 @@ export class FindAllClients {
   async execute(
     limit: number,
     page: number,
-    name?: string,
-    email?: string,
+    search?: string,
   ): Promise<{
     clients: gntClient[];
     total: number;
@@ -25,17 +24,18 @@ export class FindAllClients {
     page: number;
   }> {
     try {
-      const conditions: Array<Record<string, any>> = [];
+      const whereConditions: ClientSearchConditions = {
+        AND: [],
+      };
 
-      if (name) {
-        conditions.push({ fullName: name });
+      if (search) {
+        whereConditions.AND?.push({
+          OR: [
+            { fullName: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+          ],
+        });
       }
-
-      if (email) {
-        conditions.push({ email });
-      }
-      const whereConditions: ClientSearchConditions =
-        conditions.length > 0 ? { AND: conditions } : {};
 
       const { total, clients } = await this.clientDAO.findAll(
         limit,

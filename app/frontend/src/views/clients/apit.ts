@@ -60,7 +60,7 @@ export const fetchClientsRequest = async ({
     const params = new URLSearchParams();
     if (page) params.append("page", String(page));
     if (limit) params.append("limit", String(limit));
-    if (search) params.append("name", search);
+    if (search) params.append("search", search);
     params.append("order", order); // Padrão "asc"
 
     const url = `${API_CLIENT_URL}?${params.toString()}`;
@@ -72,10 +72,34 @@ export const fetchClientsRequest = async ({
       },
     });
 
-    console.log("📌 Clientes carregados:", response.data);
     return response.data;
   } catch (error: any) {
-    console.error("❌ Erro na requisição:", error);
     throw new Error(error.response?.data?.message || "Erro ao buscar clientes");
+  }
+};
+
+export const deleteClientRequest = async (id: string): Promise<void> => {
+  const token = getAuthToken();
+  await axios.delete(`${API_CLIENT_URL}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const fetchClientRequest = async (id: string): Promise<Client> => {
+  try {
+    const token = getAuthToken();
+    const response = await axios.get(`${API_CLIENT_URL}/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("Cliente carregado:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Erro na requisição:", error);
+    throw new Error(error.response?.data?.message || "Erro ao buscar cliente");
   }
 };

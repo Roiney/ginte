@@ -13,6 +13,12 @@ export class ClientDAO {
     });
   }
 
+  async getOne(id: string): Promise<gntClient | null> {
+    return await this.prismaService.gntClient.findUnique({
+      where: { id },
+    });
+  }
+
   async findAll(
     limit: number,
     page: number,

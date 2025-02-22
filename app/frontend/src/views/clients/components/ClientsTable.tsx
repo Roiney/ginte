@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaTrash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { Client } from "../reducer";
 
 interface ClientsTableProps {
   clients: Client[];
+  search: string;
+  setSearch: (value: string) => void;
+  page: number;
+  setPage: (value: number) => void;
+  onDelete: (ids: string[]) => void; // 🔥 Função de exclusão
 }
 
 const TableContainer = styled.div`
@@ -78,6 +84,7 @@ const DeleteButton = styled.button`
   display: flex;
   align-items: center;
   gap: 5px;
+  margin-bottom: 10px;
 
   &:hover {
     background: #b30000;
@@ -103,18 +110,16 @@ const PaginationButton = styled.button`
   }
 `;
 
-interface ClientsTableProps {
-  clients: Client[];
-  search: string;
-  setSearch: (value: string) => void;
-  page: number;
-  setPage: (value: number) => void;
-}
-
-const ClientsTable = ({ clients, search, setSearch, page, setPage }: ClientsTableProps) => {
+const ClientsTable = ({ clients, search, setSearch, page, setPage, onDelete }: ClientsTableProps) => {
   const [selected, setSelected] = useState<string[]>([]);
-
   const safeClients = Array.isArray(clients) ? clients : [];
+ const navigate = useNavigate();
+  // 🔥 Função para excluir clientes selecionados
+  const handleDeleteSelected = () => {
+    if (selected.length === 0) return;
+    onDelete(selected);
+    setSelected([]); // Limpa a seleção após excluir
+  };
 
   return (
     <TableContainer>
@@ -128,6 +133,14 @@ const ClientsTable = ({ clients, search, setSearch, page, setPage }: ClientsTabl
           onChange={(e) => setSearch(e.target.value)}
         />
       </SearchBar>
+
+      {/* 🔥 Botão de Excluir */}
+      {selected.length > 0 && (
+        <DeleteButton onClick={handleDeleteSelected}>
+          {FaTrash as unknown as JSX.Element}
+          Excluir Selecionados
+        </DeleteButton>
+      )}
 
       {/* Tabela */}
       <Table>
@@ -158,16 +171,18 @@ const ClientsTable = ({ clients, search, setSearch, page, setPage }: ClientsTabl
             const clientId = String(client.id);
 
             return (
-              <TableRow key={clientId}>
+              <TableRow key={clientId} onClick={() => navigate(`/edit-client/${clientId}`)}>
                 <TableData>
                   <Checkbox
                     type="checkbox"
                     checked={selected.includes(clientId)}
-                    onChange={() => setSelected((prev) =>
-                      prev.includes(clientId)
-                        ? prev.filter((i) => i !== clientId)
-                        : [...prev, clientId]
-                    )}
+                    onChange={() =>
+                      setSelected((prev) =>
+                        prev.includes(clientId)
+                          ? prev.filter((i) => i !== clientId)
+                          : [...prev, clientId]
+                      )
+                    }
                   />
                 </TableData>
                 <TableData>{client.fullName}</TableData>
@@ -198,4 +213,3 @@ const ClientsTable = ({ clients, search, setSearch, page, setPage }: ClientsTabl
 };
 
 export default ClientsTable;
-
