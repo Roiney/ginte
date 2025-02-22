@@ -6,13 +6,14 @@ import FormGroup from '../../../components/FormGroup/FormGroup';
 import PasswordInputGroup from '../../../components/PasswordInputGroup/PasswordInputGroup';
 import { useAppDispatch, useAppSelector } from '../../../hooks';
 import useToaster from '../../../hooks/useToaster';
+import { CLIENTS } from '../../clients/routes';
 import {
   doLogin,
   doValidateUser,
   setEmail,
   setPassword,
 } from '../reducer';
-import { AuthState, UserRole } from '../types';
+import { AuthState } from '../types';
 import { ButtonGroup, ButtonsContainer, FormContainer } from './styles';
 
 const LoginForm = () => {
@@ -33,8 +34,8 @@ const LoginForm = () => {
       showErrorMessage('Error on login');
     } else {
       const user = await dispatch(doValidateUser()).unwrap();
-      if (user?.role === UserRole.ADMINISTRATOR) {
-        navigate('/');
+      if (user) {
+        navigate(CLIENTS());
       } else {
         navigate('/');
       }
