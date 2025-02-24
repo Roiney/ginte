@@ -16,7 +16,7 @@ services:
     networks:
       - postgres-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d pier-Cloud -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ginte -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -34,7 +34,7 @@ services:
         condition: service_healthy
     environment:
       - APP_PORT=3035
-      - JWT_SECRET=jwt_secret
+      - AUTH_SECRET=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
       - DB_USER=postgres
       - DB_PASS=postgres
       - DB_HOST=db # Aqui usamos o nome do serviço no Docker Compose

@@ -33,7 +33,8 @@ ENV PORT=3035 \
     PG_PASSWORD_STORE=postgres \
     PG_DATABASE_STORE=ginte \
     PG_PORT_STORE=5432 \  
-    DATABASE_URL=postgresql://postgres:postgres@db:5432/ginte
+    DATABASE_URL=postgresql://postgres:postgres@db:5432/ginte \
+    AUTH_SECRET=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
 
 
 # Exponha a porta usada pela aplicação
